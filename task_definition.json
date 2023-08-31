@@ -8,7 +8,7 @@
         "name": "student-container",
         "image": "127977072551.dkr.ecr.ap-south-1.amazonaws.com/student:latest",
         "cpu": 512,
-        "memory": 512,
+        "memory": 1024,
         "portMappings": [
           {
             "name": "student-container",
@@ -35,6 +35,6 @@
     ],
     "requiresCompatibilities": ["FARGATE"],
     "cpu": "512",
-    "memory": "512"
+    "memory": "1024"
   }
   
