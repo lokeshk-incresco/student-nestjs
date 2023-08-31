@@ -1,0 +1,40 @@
+{
+    "family": "student-service",
+    "taskRoleArn": "arn:aws:iam::127977072551:user/student",
+    "executionRoleArn": "arn:aws:iam::127977072551:user/student",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+      {
+        "name": "student-container",
+        "image": "127977072551.dkr.ecr.ap-south-1.amazonaws.com/student:latest",
+        "cpu": 512,
+        "memory": 512,
+        "portMappings": [
+          {
+            "name": "student-container",
+            "containerPort": 80,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/aws/ecs/student-service/student-container",
+            "awslogs-region": "ap-south-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        "secrets": [
+          {
+            "name": "MONGODB_URI",
+            "valueFrom": "arn:aws:secretsmanager:ap-south-1:127977072551:secret:MONGODB_URI-Zp1LoP"
+          }
+        ]
+      }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "512"
+  }
+  

@@ -1,0 +1,52 @@
+name: student-dev
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to AWS ECR
+        run: |
+          echo $(aws ecr get-login-password --region $AWS_REGION) | docker login --username AWS --password-stdin 127977072551.dkr.ecr.$AWS_REGION.amazonaws.com
+      - name: Build Docker image
+        run: |
+          docker build -t student .
+
+      - name: Tag Docker image
+        run: |
+          docker tag student:latest 127977072551.dkr.ecr.ap-south-1.amazonaws.com/student:latest
+
+      - name: Push to ECR
+        run: |
+          docker push 127977072551.dkr.ecr.ap-south-1.amazonaws.com/student:latest
+      
+      - name: Register new task definition
+        run: |
+          aws ecs register-task-definition --family student-service --cli-input-json file://task_definition.json
+        
+      - name: Deploy to ECS
+        run: |
+          TASK_REVISION=$(aws ecs describe-task-definition --task-definition student-service --query 'taskDefinition.revision' --output text)
+          aws ecs update-service --cluster student-cluster --service student-service --task-definition student-service:$TASK_REVISION
+        
+
+      - name: Finalize and Verify Deployment
+        run: |
+          # Add any final verification or clean-up steps here
+          echo "Deployment completed successfully!"
+        
